@@ -11,7 +11,7 @@ This project is a simple file management platform that allows users to upload, v
 - **Image Thumbnails**: Automatically generate thumbnails for uploaded images.
 
 ## Requirements
-- Ubuntu 18.04 LTS
+- Ubuntu 18.04 LTS and above
 - Node.js (version 12.x.x)
 - Redis
 - MongoDB
