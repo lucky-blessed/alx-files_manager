@@ -21,22 +21,10 @@ class DBClient {
                 console.error('MongoDB connection error:', error.message);
             });
     }
-/*
-    async connect() {
-        try {
-            await this.client.connect();
-            this.connected = true;
-            console.log('Connected Successfully to MongoDB');
-        } catch (error) {
-            console.error('MongoDB connection error:', error.message);
-            this.connected = false;
-        }
-    }
-*/
+
     isAlive() {
         return this.connected;
     }
-
 
     async nbUsers() {
         if (!this.isAlive()) return 0;
