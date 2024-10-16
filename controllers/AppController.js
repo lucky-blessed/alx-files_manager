@@ -1,8 +1,10 @@
-import dbClient from '../utils/db.js';
+import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
-import RedisClient from '../utils/redis';
 
 class AppController {
+    /**
+     * Method to handle GET /status.
+     */
     static async getStatus(req, res) {
         const status = {
             redis: redisClient.isAlive(),
@@ -11,16 +13,11 @@ class AppController {
         return res.status(200).json(status);
     }
 
+     
     static async getStats(req, res) {
-        const users = await dbClient.nbUsers();
-        const files = await dbClient.nbFiles();
-
-        const stats = {
-            users,
-            files,
-        };
-
-        return res.status(200).json(stats);
+        const userCount = await dbClient.nbUsers();
+        const filesCount = await dbClient.nbFiles();
+        res.status(200).json({ users: userCount, files: filesCount });
     }
 }
 
