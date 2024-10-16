@@ -1,4 +1,4 @@
-import dbClient from "./utils/db";
+import dbClient from './utils/db';
 
 const waitConnection = () => {
     return new Promise((resolve, reject) => {
@@ -17,7 +17,7 @@ const waitConnection = () => {
                 }
             }, 1000);
         };
-        repeatFct
+        repeatFct();
     })
 };
 

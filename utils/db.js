@@ -1,47 +1,57 @@
 import { MongoClient } from 'mongodb';
 
 class DBClient {
-    constructor() {
-        const host = process.env.DB_HOST || 'localhost';
-        const port = process.env.DB_PORT || 27017;
-        const database = process.env.DB_DATABASE || 'file_manager';
+  constructor() {
+    this.client = new MongoClient('mongodb://localhost:27017', {
+        useUnifiedTopology: true,
+    });
+    this.dbName = 'files_manager';
+    this.connect();
+  }
 
-        const url = `mongodb://${host}:${port}`;
-        this.client = new MongoClient(url, { useUnifiedTopology: true });
-        this.dbName = database;
+  async connect() {
+    try {
+      await this.client.connect();
+      this.db = this.client.db(this.dbName);
+      console.log(`Connected Successfully to MongoDB: 27017`);
+    } catch (error) {
+      console.error('Failed to connect to MongoDB', error);
+    }
+  }
 
-        this.connected = false;
+  isAlive() {
+    return !!this.client && !!this.db;
+  }
 
-        this.connect();
+  async nbUsers() {
+    if (!this.isAlive()) {
+      throw new Error('DB connection is not alive');
     }
 
-    async connect() {
-        try {
-            await this.client.connect();
-            this.connected = true;
-            console.log('Connected Successfully to MongoDB');
-        } catch (error) {
-            console.error('MongoDB connection error:', error.message);
-        }
+    try {
+      const usersCollection = this.db.collection('users');
+      const userCount = await usersCollection.countDocuments();
+      return userCount;
+    } catch (error) {
+      console.error('Error fetching user count:', error);
+      return 0;
+    }
+  }
+
+  async nbFiles() {
+    if (!this.isAlive()) {
+      throw new Error('DB connection is not alive');
     }
 
-    isAlive() {
-        return this.connected;
+    try {
+      const filesCollection = this.db.collection('files');
+      const fileCount = await filesCollection.countDocuments();
+      return fileCount;
+    } catch (error) {
+      console.error('Error fetching file count:', error);
+      return 0;
     }
-
-    async nbUsers() {
-        if (!this.isAlive()) return 0;
-        const db = this.client.db(this.dbName);
-        const usersCollection = db.collection('users');
-        return await usersCollection.countDocuments();
-    }
-
-    async nbFiles() {
-        if (!this.isAlive()) return 0;
-        const db = this.client.db(this.dbName);
-        const filesCollection = db.collection('files');
-        return await filesCollection.countDocuments();
-    }
+  }
 }
 
 const dbClient = new DBClient();
