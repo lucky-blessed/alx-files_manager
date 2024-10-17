@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-import redisClient from '../utils/redis';
-import dbClient from '../utils/db';
+import redisClient from '../utils/redis.js';
+import dbClient from '../utils/db.js';
 import sha1 from 'sha1';
 
 class AuthController {
@@ -18,16 +18,14 @@ class AuthController {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const user = await dbClient.db.collection('users').findOne({ email, password: sha1(password) });
+    const user = await dbClient.client.db(dbClient.dbName).collection('users').findOne({ email, password: sha1(password) });
     if (!user) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
     const token = uuidv4();
     const redisKey = `auth_${token}`;
-    /**
-     * Expires in 24 hours
-     */
+    // Expires in 24 hours
     await redisClient.set(redisKey, String(user._id), 86400);
 
     return res.status(200).json({ token });

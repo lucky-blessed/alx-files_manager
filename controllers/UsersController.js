@@ -1,6 +1,6 @@
 import sha1 from 'sha1';
-import dbClient from '../utils/db';
-import redisClient from '../utils/redis';
+import dbClient from '../utils/db.js';
+import redisClient from '../utils/redis.js';
 
 class UsersController {
   /**
@@ -9,40 +9,30 @@ class UsersController {
   static async postNew(req, res) {
     const { email, password } = req.body;
 
-    /**
-     * Check if email is provided
-     */
+    // Check if email is provided
     if (!email) {
       return res.status(400).json({ error: 'Missing email' });
     }
 
-    /**
-     * Check if password is provided
-     */
+    // Check if password is provided
     if (!password) {
       return res.status(400).json({ error: 'Missing password' });
     }
 
-    /**
-     * Check if email already exists in the database
-     */
+    // Check if email already exists in the database
     const userExists = await dbClient.client
       .db(dbClient.dbName)
       .collection('users')
       .findOne({ email });
 
     if (userExists) {
-      return res.status(400).json({ error: 'Already exist' });
+      return res.status(400).json({ error: 'Already exists' });
     }
 
-    /**
-     * Hash the password using SHA1
-     */
+    // Hash the password using SHA1
     const hashedPassword = sha1(password);
 
-    /**
-     * Insert the new user into the users collection
-     */
+    // Insert the new user into the users collection
     const result = await dbClient.client
       .db(dbClient.dbName)
       .collection('users')
@@ -51,9 +41,7 @@ class UsersController {
         password: hashedPassword,
       });
 
-    /**
-     * Return the created user (only id and email) with status 201
-     */
+    // Return the created user (only id and email) with status 201
     return res.status(201).json({ id: result.insertedId, email });
   }
 
@@ -61,25 +49,19 @@ class UsersController {
    * Retrieve user information based on the authentication token
    */
   static async getMe(req, res) {
-    /**
-     * Extract token from the X-Token header
-     */
+    // Extract token from the X-Token header
     const token = req.header('X-Token');
     if (!token) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    /**
-     * Check if the token exists in Redis
-     */
+    // Check if the token exists in Redis
     const userId = await redisClient.get(`auth_${token}`);
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    /**
-     * Retrieve the user information from MongoDB
-     */
+    // Retrieve the user information from MongoDB
     const user = await dbClient.client
       .db(dbClient.dbName)
       .collection('users')
@@ -89,9 +71,7 @@ class UsersController {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    /**
-     * Return the user object (id and email only)
-     */
+    // Return the user object (id and email only)
     return res.status(200).json({ id: user._id, email: user.email });
   }
 }
